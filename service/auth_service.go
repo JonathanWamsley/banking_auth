@@ -18,12 +18,16 @@ func NewLoginService(repo domain.AuthRepository) DefaultAuthService {
 	return DefaultAuthService{repo}
 }
 
-// Login  verifies a users credentails and then returns dummy msg on sucess
+// Login  verifies a users credentails and then returns a jwt token on success
 func (s DefaultAuthService) Login(req dto.LoginRequest) (*string, *errs.AppError) {
-	_, err := s.repo.FindBy(req.Username, req.Password)
+	login, err := s.repo.FindBy(req.Username, req.Password)
 	if err != nil {
 		return nil, err
 	}
-	msg := "mock successfully logged in"
-	return &msg, nil
+
+	token, err := login.GenerateToken()
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
 }
