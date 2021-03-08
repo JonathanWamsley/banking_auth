@@ -29,6 +29,38 @@ func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
+	urlParams := make(map[string]string)
+
+	// converting from Query to map type
+	for k := range r.URL.Query() {
+		urlParams[k] = r.URL.Query().Get(k)
+	}
+
+	if urlParams["token"] != "" {
+		isAuthorized, appError := h.service.Verify(urlParams)
+		if appError != nil {
+			writeResponse(w, http.StatusForbidden, notAuthorizedResponse())
+		} else {
+			if isAuthorized {
+				writeResponse(w, http.StatusOK, authorizedResponse())
+			} else {
+				writeResponse(w, http.StatusForbidden, notAuthorizedResponse())
+			}
+		}
+	} else {
+		writeResponse(w, http.StatusForbidden, "missing token")
+	}
+}
+
+func notAuthorizedResponse() map[string]bool {
+	return map[string]bool{"isAuthorized": false}
+}
+
+func authorizedResponse() map[string]bool {
+	return map[string]bool{"isAuthorized": true}
+}
+
 func writeResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(code)

@@ -54,6 +54,7 @@ func Start() {
 	ah := AuthHandler{service.NewLoginService(domain.NewAuthRepository(dbClient))}
 	router := mux.NewRouter()
 	router.HandleFunc("/auth/login", ah.Login).Methods(http.MethodPost)
+	router.HandleFunc("/auth/verify", ah.Verify).Methods(http.MethodGet)
 
 	logger.Info(fmt.Sprintf("Starting server on %s ...", serverInfo))
 	log.Fatal(http.ListenAndServe(serverInfo, router))
