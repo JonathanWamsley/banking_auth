@@ -51,7 +51,7 @@ func Start() {
 	dbClient := getDbClient(config.GetMySQLInfo())
 	serverInfo := config.GetServerInfo()
 
-	ah := AuthHandler{service.NewLoginService(domain.NewAuthRepository(dbClient))}
+	ah := AuthHandler{service.NewLoginService(domain.NewAuthRepository(dbClient), domain.GetRolePermissions())}
 	router := mux.NewRouter()
 	router.HandleFunc("/auth/login", ah.Login).Methods(http.MethodPost)
 	router.HandleFunc("/auth/verify", ah.Verify).Methods(http.MethodGet)
