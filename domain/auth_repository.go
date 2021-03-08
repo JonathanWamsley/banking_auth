@@ -22,7 +22,7 @@ func NewAuthRepository(client *sqlx.DB) AuthRepositoryDB {
 
 // queries
 const (
-	validLogin = "select customer_id from banking.users where username = ? and password = ?;"
+	validLogin = "select customer_id, role from banking.users where username = ? and password = ?;"
 
 	getAccountID = "SELECT a.account_id as account_numbers FROM banking.users u LEFT JOIN banking.accounts a ON a.customer_id = u.customer_id WHERE u.username = ? and password = ?;"
 )
@@ -43,13 +43,15 @@ func (d AuthRepositoryDB) FindBy(username, password string) (*Login, *errs.AppEr
 
 	// now get the verify users account ids
 	accounts := make([]string, 0)
-	err = d.client.Select(&accounts, getAccountID, username, password)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// pass, a user is allowed to have no accounts
-		} else {
-			logger.Error("Error while verifying login request from database: " + err.Error())
-			return nil, errs.NewUnexpectedError("unexpected database error")
+	if login.Role == "user" {
+		err = d.client.Select(&accounts, getAccountID, username, password)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// pass, a user is allowed to have no accounts
+			} else {
+				logger.Error("Error while verifying login request from database: " + err.Error())
+				return nil, errs.NewUnexpectedError("unexpected database error")
+			}
 		}
 	}
 

@@ -1,10 +1,10 @@
 package service
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jonathanwamsley/banking_auth/domain"
 	"github.com/jonathanwamsley/banking_auth/dto"
 	"github.com/jonathanwamsley/banking_auth/errs"
-	"github.com/dgrijalva/jwt-go"
 )
 
 type AuthService interface {
@@ -13,11 +13,12 @@ type AuthService interface {
 }
 
 type DefaultAuthService struct {
-	repo domain.AuthRepository
+	repo            domain.AuthRepository
+	rolePermissions domain.RolePermissions
 }
 
-func NewLoginService(repo domain.AuthRepository) DefaultAuthService {
-	return DefaultAuthService{repo}
+func NewLoginService(repo domain.AuthRepository, permissions domain.RolePermissions) DefaultAuthService {
+	return DefaultAuthService{repo, permissions}
 }
 
 // Login  verifies a users credentails and then returns a jwt token on success
@@ -53,14 +54,14 @@ func (s DefaultAuthService) Verify(urlParams map[string]string) (bool, *errs.App
 				/* if Role if user then check if the account_id and customer_id
 				   coming in the URL belongs to the same token
 				*/
-				// if claims.IsUserRole() {
-				if !claims.IsRequestVerifiedWithTokenClaims(urlParams) {
-					return false, nil
+				if claims.IsUserRole() {
+					if !claims.IsRequestVerifiedWithTokenClaims(urlParams) {
+						return false, nil
+					}
 				}
-				// }
 				// verify of the role is authorized to use the route
-				//isAuthorized := s.rolePermissions.IsAuthorizedFor(claims.Role, urlParams["routeName"])
-				return true, nil
+				isAuthorized := s.rolePermissions.IsAuthorizedFor(claims.Role, urlParams["routeName"])
+				return isAuthorized, nil
 			}
 		} else {
 			return false, errs.NewNotFoundError("Invalid token")

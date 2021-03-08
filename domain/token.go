@@ -14,8 +14,8 @@ type Claims struct {
 	Accounts   []string `json:"accounts"`
 	Username   string   `json:"username"`
 	Expiry     int64    `json:"exp"`
+	Role       string   `json:"role"`
 }
-
 
 func BuildClaimsFromJwtMapClaims(mapClaims jwt.MapClaims) (*Claims, *errs.AppError) {
 	bytes, err := json.Marshal(mapClaims)
@@ -25,7 +25,7 @@ func BuildClaimsFromJwtMapClaims(mapClaims jwt.MapClaims) (*Claims, *errs.AppErr
 	var c Claims
 	err = json.Unmarshal(bytes, &c)
 	if err != nil {
-		return nil,errs.NewValidationError("invalid token claim")
+		return nil, errs.NewValidationError("invalid token claim")
 	}
 	return &c, nil
 }
@@ -57,4 +57,8 @@ func (c Claims) IsRequestVerifiedWithTokenClaims(urlParams map[string]string) bo
 		return false
 	}
 	return true
+}
+
+func (c Claims) IsUserRole() bool {
+	return c.Role == "user"
 }
