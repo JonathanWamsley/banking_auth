@@ -41,6 +41,8 @@ func (d AuthRepositoryDB) FindBy(username, password string) (*Login, *errs.AppEr
 		}
 	}
 
+	
+
 	// now get the verify users account ids
 	accounts := make([]string, 0)
 	if login.Role == "user" {
