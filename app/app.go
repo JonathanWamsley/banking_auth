@@ -52,9 +52,14 @@ func Start() {
 	serverInfo := config.GetServerInfo()
 
 	ah := AuthHandler{service.NewLoginService(domain.NewAuthRepository(dbClient), domain.GetRolePermissions())}
+	uh := UserHandler{service.NewUsersService(domain.NewUsersRepository(dbClient))}
 	router := mux.NewRouter()
 	router.HandleFunc("/auth/login", ah.Login).Methods(http.MethodPost)
 	router.HandleFunc("/auth/verify", ah.Verify).Methods(http.MethodGet)
+
+	router.HandleFunc("/users", uh.CreateUser).Methods(http.MethodPost)
+	router.HandleFunc("/admins", uh.CreateAdmin).Methods(http.MethodPost)
+	router.HandleFunc("/users", uh.GetUsers).Methods(http.MethodGet)
 
 	logger.Info(fmt.Sprintf("Starting server on %s ...", serverInfo))
 	log.Fatal(http.ListenAndServe(serverInfo, router))

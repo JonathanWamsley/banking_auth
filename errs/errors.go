@@ -38,3 +38,11 @@ func NewValidationError(message string) *AppError {
 		Message: message,
 	}
 }
+
+// NewBadRequest returns status unprocessable(400) error + msg
+func NewBadRequest(message string) *AppError {
+	return &AppError{
+		Code:    http.StatusBadRequest,
+		Message: message,
+	}
+}
