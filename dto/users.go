@@ -34,6 +34,10 @@ func (u *UserRequest) Validate() *errs.AppError {
 		return errs.NewBadRequest("invalid password")
 	}
 
+	if len(u.Password) < 8 {
+		return errs.NewBadRequest("password must be be at least 8 characters")
+	}
+
 	if u.CustomerID == "" {
 		return errs.NewBadRequest("invalid customer id")
 	}
@@ -48,6 +52,10 @@ func (u *AdminRequest) Validate() *errs.AppError {
 
 	if u.Password == "" {
 		return errs.NewBadRequest("invalid password")
+	}
+
+	if len(u.Password) < 8 {
+		return errs.NewBadRequest("password must be be at least 8 characters")
 	}
 
 	return nil
